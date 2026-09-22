@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X } from 'lucide-react';
 import Modal from '../../../components/Modal';
 import { kiranaApi } from '../../../api/kirana';
 import { apiErrorMessage } from '../../../api/client';
@@ -78,7 +79,7 @@ export default function NewBillModal({ customers = [], inventory = [], onClose, 
           <input type="number" placeholder="Qty" value={it.qty} onChange={(e) => updateItem(idx, 'qty', e.target.value)} />
           <input type="number" placeholder="Rate" value={it.rate} onChange={(e) => updateItem(idx, 'rate', e.target.value)} />
           <div className="li-amt">₹{fmt((Number(it.qty) || 0) * (Number(it.rate) || 0))}</div>
-          <div className="li-remove" onClick={() => removeItem(idx)}>✕</div>
+          <div className="li-remove" onClick={() => removeItem(idx)}><X size={14} /></div>
         </div>
       ))}
       <div className="add-line-btn" onClick={addItem}>+ Add Item</div>

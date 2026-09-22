@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Search, Factory, Snowflake, ArrowRight } from 'lucide-react';
 import TopBar from '../../components/TopBar';
 import Empty from '../../components/Empty';
 import Modal from '../../components/Modal';
@@ -49,7 +50,7 @@ export default function StoreSelect() {
       <TopBar title="Select Cold Storage" sub="Choose a unit to open" onBack={() => navigate('/firms')} />
       <div className="search-wrap">
         <div className="search-box">
-          <span>🔍</span>
+          <span><Search size={16} /></span>
           <input placeholder="Search cold storage..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
@@ -57,15 +58,15 @@ export default function StoreSelect() {
         {loading ? (
           <div className="spinner-wrap">Loading…</div>
         ) : stores.length === 0 ? (
-          <Empty icon="🏭" msg="No cold storage added" hint="Tap + to add one" />
+          <Empty icon={Factory} msg="No cold storage added" hint="Tap + to add one" />
         ) : stores.map((s) => (
           <div className="firm-card" key={s._id} onClick={() => navigate(`/cold-storage/${s._id}`)}>
-            <div className="firm-icon">❄️</div>
+            <div className="firm-icon"><Snowflake size={22} /></div>
             <div>
               <div className="firm-name">{s.name}</div>
               <div className="firm-tag">{s.inCount} IN · {s.outCount} OUT</div>
             </div>
-            <div className="firm-arrow">➔</div>
+            <div className="firm-arrow"><ArrowRight size={18} /></div>
           </div>
         ))}
       </div>

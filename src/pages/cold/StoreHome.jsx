@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Search, ArrowDownToLine, ArrowUpFromLine, Wallet, FolderClock, Package } from 'lucide-react';
 import TopBar from '../../components/TopBar';
 import Empty from '../../components/Empty';
 import { coldApi } from '../../api/coldStorage';
@@ -9,10 +10,10 @@ import OutEntryModal from './modals/OutEntryModal';
 import RentEntryModal from './modals/RentEntryModal';
 
 const TABS = [
-  ['in', 'IN', '⬇️'],
-  ['out', 'OUT', '⬆️'],
-  ['rent', 'Rent', '💰'],
-  ['history', 'History', '🗂️'],
+  ['in', 'IN', ArrowDownToLine],
+  ['out', 'OUT', ArrowUpFromLine],
+  ['rent', 'Rent', Wallet],
+  ['history', 'History', FolderClock],
 ];
 
 export default function StoreHome() {
@@ -61,7 +62,7 @@ export default function StoreHome() {
       <TopBar title={store.name} sub="Cold Storage Register" onBack={() => navigate('/cold-storage')} />
       <div className="search-wrap">
         <div className="search-box">
-          <span>🔍</span>
+          <span><Search size={16} /></span>
           <input placeholder="Search records..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
@@ -80,7 +81,7 @@ export default function StoreHome() {
               <div className="bpill" style={{ flex: 1 }}><div className="lbl">Total Rent Paid</div><div className="val amt amber">₹{fmt(rentData.totalRent)}</div></div>
             </div>
             {rentData.rents.length === 0 ? (
-              <Empty icon="💰" msg="No rent payments" hint="Tap + to add one" />
+              <Empty icon={Wallet} msg="No rent payments" hint="Tap + to add one" />
             ) : rentData.rents.map((r) => (
               <div className="card" key={r._id}>
                 <div className="tile">
@@ -94,7 +95,7 @@ export default function StoreHome() {
 
         {!loading && tab !== 'rent' && (
           entries.length === 0 ? (
-            <Empty icon="📦" msg="No records" hint="Tap + to add an entry" />
+            <Empty icon={Package} msg="No records" hint="Tap + to add an entry" />
           ) : entries.map((e) => e.mode === 'in' ? (
             <div className="card" key={e._id}>
               <div className="tile">
@@ -127,9 +128,9 @@ export default function StoreHome() {
       )}
 
       <div className="bottomnav">
-        {TABS.map(([k, l, ic]) => (
+        {TABS.map(([k, l, Ic]) => (
           <button key={k} className={`navitem${tab === k ? ' active' : ''}`} onClick={() => { setTab(k); setSearch(''); }}>
-            <div className="ic">{ic}</div>
+            <div className="ic"><Ic size={18} /></div>
             <div className="lb">{l}</div>
           </button>
         ))}

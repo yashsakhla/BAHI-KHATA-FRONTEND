@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Search, Users, Package, Receipt, FolderClock, MapPin, BookOpen } from 'lucide-react';
 import TopBar from '../../components/TopBar';
 import Empty from '../../components/Empty';
 import { kiranaApi } from '../../api/kirana';
@@ -12,10 +13,10 @@ import BillDetailModal from './modals/BillDetailModal';
 import ReceiptDetailModal from './modals/ReceiptDetailModal';
 
 const TABS = [
-  ['customers', 'Customers', '👤'],
-  ['inventory', 'Inventory', '📦'],
-  ['bills', 'Bills', '🧾'],
-  ['history', 'History', '🗂️'],
+  ['customers', 'Customers', Users],
+  ['inventory', 'Inventory', Package],
+  ['bills', 'Bills', Receipt],
+  ['history', 'History', FolderClock],
 ];
 
 export default function KiranaHome() {
@@ -96,7 +97,7 @@ export default function KiranaHome() {
       <TopBar title="Manoj Kirana Dukan" sub="Grocery Ledger" onBack={() => navigate('/firms')} />
       <div className="search-wrap">
         <div className="search-box">
-          <span>🔍</span>
+          <span><Search size={16} /></span>
           <input placeholder="Search anything..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
@@ -111,14 +112,14 @@ export default function KiranaHome() {
 
         {!loading && tab === 'customers' && (
           filteredCustomers.length === 0 ? (
-            <Empty icon="📒" msg="No customers yet" hint="Tap + to add a debit or credit entry" />
+            <Empty icon={BookOpen} msg="No customers yet" hint="Tap + to add a debit or credit entry" />
           ) : filteredCustomers.map((c) => (
             <div className="card" key={c._id}>
               <div className="card-row" onClick={() => navigate(`/kirana/customers/${c._id}`)}>
                 <div className="avatar">{c.name.slice(0, 1).toUpperCase()}</div>
                 <div style={{ flex: 1 }}>
                   <div className="title-line">{c.name}</div>
-                  <div className="sub-line">{c.village ? `📍 ${c.village}` : ''}</div>
+                  <div className="sub-line">{c.village ? <><MapPin size={12} style={{ verticalAlign: '-2px', marginRight: 3 }} />{c.village}</> : ''}</div>
                 </div>
                 <div className={`amt ${c.balance > 0 ? 'debit' : c.balance < 0 ? 'credit' : 'settled'}`}>
                   ₹{fmt(Math.abs(c.balance))}
@@ -130,13 +131,13 @@ export default function KiranaHome() {
 
         {!loading && tab === 'inventory' && (
           inventory.length === 0 ? (
-            <Empty icon="📦" msg="No inventory items yet" hint="Tap + to add stock" />
+            <Empty icon={Package} msg="No inventory items yet" hint="Tap + to add stock" />
           ) : inventory
             .filter((i) => !q || i.name.toLowerCase().includes(q))
             .map((item) => (
               <div className="card" key={item._id}>
                 <div className="card-row" onClick={() => setAdjustItem(item)}>
-                  <div className="avatar">📦</div>
+                  <div className="avatar"><Package size={18} /></div>
                   <div style={{ flex: 1 }}>
                     <div className="title-line">{item.name}</div>
                     <div className="sub-line">{item.qty} {item.unit} in stock</div>
@@ -149,11 +150,11 @@ export default function KiranaHome() {
 
         {!loading && tab === 'bills' && (
           filteredBills.length === 0 ? (
-            <Empty icon="🧾" msg="No bills yet" hint="Tap + to create a new bill" />
+            <Empty icon={Receipt} msg="No bills yet" hint="Tap + to create a new bill" />
           ) : filteredBills.map((b) => (
             <div className="card" key={b._id}>
               <div className="card-row" onClick={() => setViewBill(b)}>
-                <div className="avatar">🧾</div>
+                <div className="avatar"><Receipt size={18} /></div>
                 <div style={{ flex: 1 }}>
                   <div className="title-line">{b.billNo} · {b.customerName}</div>
                   <div className="sub-line">{b.date} · {b.items.length} items</div>
@@ -166,7 +167,7 @@ export default function KiranaHome() {
 
         {!loading && tab === 'history' && (
           filteredEntries.length === 0 ? (
-            <Empty icon="🗂️" msg="No ledger history yet" hint="Entries you add will show up here" />
+            <Empty icon={FolderClock} msg="No ledger history yet" hint="Entries you add will show up here" />
           ) : filteredEntries.map((e) => {
             const c = customers.find((x) => x._id === e.customerId);
             return (
@@ -178,7 +179,7 @@ export default function KiranaHome() {
                   </div>
                   <div className="tile-detail"><span>{e.itemName} × {e.qty}</span><span>{e.date}</span></div>
                   <div className="tile-detail">
-                    <span>{e.village ? `📍 ${e.village}` : ''}</span>
+                    <span>{e.village ? <><MapPin size={12} style={{ verticalAlign: '-2px', marginRight: 3 }} />{e.village}</> : ''}</span>
                     <span className={`badge ${e.type}`}>{e.type === 'debit' ? 'Udhaar' : 'Paid'}</span>
                   </div>
                   <div style={{ textAlign: 'right', marginTop: 8 }}>
@@ -205,9 +206,9 @@ export default function KiranaHome() {
       )}
 
       <div className="bottomnav">
-        {TABS.map(([k, l, ic]) => (
+        {TABS.map(([k, l, Ic]) => (
           <button key={k} className={`navitem${tab === k ? ' active' : ''}`} onClick={() => { setTab(k); setSearch(''); }}>
-            <div className="ic">{ic}</div>
+            <div className="ic"><Ic size={18} /></div>
             <div className="lb">{l}</div>
           </button>
         ))}

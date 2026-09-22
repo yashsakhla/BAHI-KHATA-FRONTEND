@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { ShoppingBag } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
@@ -16,7 +17,7 @@ export default function Login() {
 
   return (
     <div className="login-wrap">
-      <div className="brand-seal">🛍️</div>
+      <div className="brand-seal"><ShoppingBag size={28} /></div>
       <div className="login-title">Bahi Khata</div>
       <div className="login-sub">Smart ledger &amp; cold storage register</div>
       <form onSubmit={submit}>

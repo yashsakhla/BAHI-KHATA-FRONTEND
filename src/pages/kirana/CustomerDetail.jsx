@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { MapPin, Receipt } from 'lucide-react';
 import TopBar from '../../components/TopBar';
 import Empty from '../../components/Empty';
 import { kiranaApi } from '../../api/kirana';
@@ -67,7 +68,7 @@ export default function CustomerDetail() {
 
   return (
     <div>
-      <TopBar title={customer.name} sub={customer.village ? `📍 ${customer.village}` : ''} onBack={() => navigate('/kirana')} />
+      <TopBar title={customer.name} sub={customer.village ? <><MapPin size={12} style={{ verticalAlign: '-2px', marginRight: 3 }} />{customer.village}</> : ''} onBack={() => navigate('/kirana')} />
 
       <div className="balance-strip">
         <div className="bpill"><div className="lbl">Debit</div><div className="val amt debit">₹{fmt(debitTotal)}</div></div>
@@ -83,7 +84,7 @@ export default function CustomerDetail() {
       <div className="section-label">Entry History</div>
       <div className="body-scroll">
         {entries.length === 0 ? (
-          <Empty icon="🧾" msg="No entries yet" />
+          <Empty icon={Receipt} msg="No entries yet" />
         ) : entries.map((e) => (
           <div className="card" key={e._id}>
             <div className="tile">

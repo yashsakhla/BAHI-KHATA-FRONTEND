@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { ShoppingBag } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
@@ -28,7 +29,7 @@ export default function Register() {
 
   return (
     <div className="login-wrap">
-      <div className="brand-seal">🛍️</div>
+      <div className="brand-seal"><ShoppingBag size={28} /></div>
       <div className="login-title">Create Account</div>
       <div className="login-sub">Set up access to your Bahi Khata</div>
       <form onSubmit={submit}>

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { ShoppingCart, Snowflake, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Firms() {
@@ -18,20 +19,20 @@ export default function Firms() {
       </div>
       <div className="body-scroll" style={{ paddingTop: 20 }}>
         <div className="firm-card" onClick={() => navigate('/kirana')}>
-          <div className="firm-icon">🛒</div>
+          <div className="firm-icon"><ShoppingCart size={22} /></div>
           <div>
             <div className="firm-name">Manoj Kirana Dukan</div>
             <div className="firm-tag">Ledger, inventory &amp; billing</div>
           </div>
-          <div className="firm-arrow">➔</div>
+          <div className="firm-arrow"><ArrowRight size={18} /></div>
         </div>
         <div className="firm-card" onClick={() => navigate('/cold-storage')}>
-          <div className="firm-icon">❄️</div>
+          <div className="firm-icon"><Snowflake size={22} /></div>
           <div>
             <div className="firm-name">Cold Storage</div>
             <div className="firm-tag">Lot register &amp; rent tracking</div>
           </div>
-          <div className="firm-arrow">➔</div>
+          <div className="firm-arrow"><ArrowRight size={18} /></div>
         </div>
       </div>
     </div>
