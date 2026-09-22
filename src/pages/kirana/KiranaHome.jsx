@@ -1,0 +1,246 @@
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import TopBar from '../../components/TopBar';
+import Empty from '../../components/Empty';
+import { kiranaApi } from '../../api/kirana';
+import { fmt } from '../../utils/format';
+import EntryModal from './modals/EntryModal';
+import InventoryModal from './modals/InventoryModal';
+import StockAdjustModal from './modals/StockAdjustModal';
+import NewBillModal from './modals/NewBillModal';
+import BillDetailModal from './modals/BillDetailModal';
+import ReceiptDetailModal from './modals/ReceiptDetailModal';
+
+const TABS = [
+  ['customers', 'Customers', '👤'],
+  ['inventory', 'Inventory', '📦'],
+  ['bills', 'Bills', '🧾'],
+  ['history', 'History', '🗂️'],
+];
+
+export default function KiranaHome() {
+  const navigate = useNavigate();
+  const [tab, setTab] = useState('customers');
+  const [search, setSearch] = useState('');
+
+  const [customers, setCustomers] = useState([]);
+  const [inventory, setInventory] = useState([]);
+  const [bills, setBills] = useState([]);
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [showEntryModal, setShowEntryModal] = useState(false);
+  const [showInventoryModal, setShowInventoryModal] = useState(false);
+  const [adjustItem, setAdjustItem] = useState(null);
+  const [showNewBill, setShowNewBill] = useState(false);
+  const [viewBill, setViewBill] = useState(null);
+  const [viewReceipt, setViewReceipt] = useState(null);
+
+  const loadAll = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [c, i, b, e] = await Promise.all([
+        kiranaApi.listCustomers(),
+        kiranaApi.listInventory(),
+        kiranaApi.listBills(),
+        kiranaApi.listEntries(),
+      ]);
+      setCustomers(c);
+      setInventory(i);
+      setBills(b);
+      setEntries(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadAll(); }, [loadAll]);
+
+  const q = search.trim().toLowerCase();
+
+  const filteredCustomers = customers.filter(
+    (c) => !q || c.name.toLowerCase().includes(q) || (c.village || '').toLowerCase().includes(q),
+  );
+  const filteredBills = bills
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date) || b.billNo.localeCompare(a.billNo))
+    .filter((b) => !q || [b.billNo, b.customerName, b.village].join(' ').toLowerCase().includes(q));
+  const filteredEntries = entries
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .filter((e) => {
+      if (!q) return true;
+      const c = customers.find((x) => x._id === e.customerId);
+      return [e.itemName, e.village, c ? c.name : '', e.date].join(' ').toLowerCase().includes(q);
+    });
+
+  const handleGenerateDoc = async (entry) => {
+    if (entry.docId) {
+      if (entry.docType === 'bill') {
+        const bill = await kiranaApi.getBill(entry.docId);
+        setViewBill(bill);
+      } else {
+        const receipt = await kiranaApi.getReceipt(entry.docId);
+        setViewReceipt(receipt);
+      }
+      return;
+    }
+    const doc = await kiranaApi.generateDoc(entry._id);
+    await loadAll();
+    if (entry.type === 'debit') setViewBill(doc);
+    else setViewReceipt(doc);
+  };
+
+  return (
+    <div>
+      <TopBar title="Manoj Kirana Dukan" sub="Grocery Ledger" onBack={() => navigate('/firms')} />
+      <div className="search-wrap">
+        <div className="search-box">
+          <span>🔍</span>
+          <input placeholder="Search anything..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
+      </div>
+      <div className="tabs">
+        {TABS.map(([k, l]) => (
+          <div key={k} className={`tab${tab === k ? ' active' : ''}`} onClick={() => { setTab(k); setSearch(''); }}>{l}</div>
+        ))}
+      </div>
+
+      <div className="body-scroll">
+        {loading && <div className="spinner-wrap">Loading…</div>}
+
+        {!loading && tab === 'customers' && (
+          filteredCustomers.length === 0 ? (
+            <Empty icon="📒" msg="No customers yet" hint="Tap + to add a debit or credit entry" />
+          ) : filteredCustomers.map((c) => (
+            <div className="card" key={c._id}>
+              <div className="card-row" onClick={() => navigate(`/kirana/customers/${c._id}`)}>
+                <div className="avatar">{c.name.slice(0, 1).toUpperCase()}</div>
+                <div style={{ flex: 1 }}>
+                  <div className="title-line">{c.name}</div>
+                  <div className="sub-line">{c.village ? `📍 ${c.village}` : ''}</div>
+                </div>
+                <div className={`amt ${c.balance > 0 ? 'debit' : c.balance < 0 ? 'credit' : 'settled'}`}>
+                  ₹{fmt(Math.abs(c.balance))}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+
+        {!loading && tab === 'inventory' && (
+          inventory.length === 0 ? (
+            <Empty icon="📦" msg="No inventory items yet" hint="Tap + to add stock" />
+          ) : inventory
+            .filter((i) => !q || i.name.toLowerCase().includes(q))
+            .map((item) => (
+              <div className="card" key={item._id}>
+                <div className="card-row" onClick={() => setAdjustItem(item)}>
+                  <div className="avatar">📦</div>
+                  <div style={{ flex: 1 }}>
+                    <div className="title-line">{item.name}</div>
+                    <div className="sub-line">{item.qty} {item.unit} in stock</div>
+                  </div>
+                  <div className="amt">₹{fmt(item.price)}</div>
+                </div>
+              </div>
+            ))
+        )}
+
+        {!loading && tab === 'bills' && (
+          filteredBills.length === 0 ? (
+            <Empty icon="🧾" msg="No bills yet" hint="Tap + to create a new bill" />
+          ) : filteredBills.map((b) => (
+            <div className="card" key={b._id}>
+              <div className="card-row" onClick={() => setViewBill(b)}>
+                <div className="avatar">🧾</div>
+                <div style={{ flex: 1 }}>
+                  <div className="title-line">{b.billNo} · {b.customerName}</div>
+                  <div className="sub-line">{b.date} · {b.items.length} items</div>
+                </div>
+                <div className="amt debit">₹{fmt(b.total)}</div>
+              </div>
+            </div>
+          ))
+        )}
+
+        {!loading && tab === 'history' && (
+          filteredEntries.length === 0 ? (
+            <Empty icon="🗂️" msg="No ledger history yet" hint="Entries you add will show up here" />
+          ) : filteredEntries.map((e) => {
+            const c = customers.find((x) => x._id === e.customerId);
+            return (
+              <div className="card" key={e._id}>
+                <div className="tile">
+                  <div className="tile-row">
+                    <div className="title-line" style={{ fontSize: 14 }}>{c ? c.name : '—'}</div>
+                    <div className={`amt ${e.type}`}>{e.type === 'debit' ? '+' : '−'}₹{fmt(e.amount)}</div>
+                  </div>
+                  <div className="tile-detail"><span>{e.itemName} × {e.qty}</span><span>{e.date}</span></div>
+                  <div className="tile-detail">
+                    <span>{e.village ? `📍 ${e.village}` : ''}</span>
+                    <span className={`badge ${e.type}`}>{e.type === 'debit' ? 'Udhaar' : 'Paid'}</span>
+                  </div>
+                  <div style={{ textAlign: 'right', marginTop: 8 }}>
+                    <button className="doc-gen-btn" onClick={() => handleGenerateDoc(e)}>
+                      {e.docId ? 'View Doc' : e.type === 'debit' ? 'Generate Invoice' : 'Generate Receipt'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {tab !== 'history' && (
+        <button
+          className="fab"
+          onClick={() => {
+            if (tab === 'customers') setShowEntryModal(true);
+            if (tab === 'inventory') setShowInventoryModal(true);
+            if (tab === 'bills') setShowNewBill(true);
+          }}
+        >+</button>
+      )}
+
+      <div className="bottomnav">
+        {TABS.map(([k, l, ic]) => (
+          <button key={k} className={`navitem${tab === k ? ' active' : ''}`} onClick={() => { setTab(k); setSearch(''); }}>
+            <div className="ic">{ic}</div>
+            <div className="lb">{l}</div>
+          </button>
+        ))}
+      </div>
+
+      {showEntryModal && (
+        <EntryModal
+          customers={customers}
+          onClose={() => setShowEntryModal(false)}
+          onSaved={loadAll}
+        />
+      )}
+      {showInventoryModal && (
+        <InventoryModal onClose={() => setShowInventoryModal(false)} onSaved={loadAll} />
+      )}
+      {adjustItem && (
+        <StockAdjustModal
+          item={adjustItem}
+          onClose={() => setAdjustItem(null)}
+          onSaved={loadAll}
+          onDeleted={loadAll}
+        />
+      )}
+      {showNewBill && (
+        <NewBillModal
+          customers={customers}
+          inventory={inventory}
+          onClose={() => setShowNewBill(false)}
+          onSaved={(bill) => { loadAll(); setViewBill(bill); }}
+        />
+      )}
+      {viewBill && <BillDetailModal bill={viewBill} onClose={() => { setViewBill(null); loadAll(); }} />}
+      {viewReceipt && <ReceiptDetailModal receipt={viewReceipt} onClose={() => { setViewReceipt(null); loadAll(); }} />}
+    </div>
+  );
+}
