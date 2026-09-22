@@ -2,8 +2,10 @@ import { useState } from 'react';
 import Modal from '../../../components/Modal';
 import { kiranaApi } from '../../../api/kirana';
 import { apiErrorMessage } from '../../../api/client';
+import { useLanguage } from '../../../context/LanguageContext';
 
 export default function StockAdjustModal({ item, onClose, onSaved, onDeleted }) {
+  const { t } = useLanguage();
   const [mode, setMode] = useState('add');
   const [qty, setQty] = useState('');
   const [price, setPrice] = useState(item.price);
@@ -12,7 +14,7 @@ export default function StockAdjustModal({ item, onClose, onSaved, onDeleted }) 
 
   const save = async () => {
     const q = Number(qty);
-    if (!q || q <= 0) { setErr('Enter a valid quantity'); return; }
+    if (!q || q <= 0) { setErr(t('modal.validQty')); return; }
     setSaving(true);
     setErr('');
     try {
@@ -20,7 +22,7 @@ export default function StockAdjustModal({ item, onClose, onSaved, onDeleted }) 
       onSaved?.();
       onClose();
     } catch (e) {
-      setErr(apiErrorMessage(e, 'Could not update stock'));
+      setErr(apiErrorMessage(e, t('modal.couldNotUpdateStock')));
     } finally {
       setSaving(false);
     }
@@ -33,7 +35,7 @@ export default function StockAdjustModal({ item, onClose, onSaved, onDeleted }) 
       onDeleted?.();
       onClose();
     } catch (e) {
-      setErr(apiErrorMessage(e, 'Could not delete item'));
+      setErr(apiErrorMessage(e, t('modal.couldNotDeleteItem')));
       setSaving(false);
     }
   };
@@ -41,22 +43,22 @@ export default function StockAdjustModal({ item, onClose, onSaved, onDeleted }) 
   return (
     <Modal title={item.name} onClose={onClose}>
       <div className="field">
-        <label>Current Stock</label>
+        <label>{t('modal.currentStock')}</label>
         <input value={`${item.qty} ${item.unit}`} disabled />
       </div>
       <div className="field">
-        <label>Adjustment Type</label>
+        <label>{t('modal.adjustmentType')}</label>
         <div className="toggle2">
-          <div className={`opt${mode === 'add' ? ' sel-add' : ''}`} onClick={() => setMode('add')}>Add Stock</div>
-          <div className={`opt${mode === 'reduce' ? ' sel-reduce' : ''}`} onClick={() => setMode('reduce')}>Reduce Stock</div>
+          <div className={`opt${mode === 'add' ? ' sel-add' : ''}`} onClick={() => setMode('add')}>{t('modal.addStock')}</div>
+          <div className={`opt${mode === 'reduce' ? ' sel-reduce' : ''}`} onClick={() => setMode('reduce')}>{t('modal.reduceStock')}</div>
         </div>
       </div>
-      <div className="field"><label>Qty to Adjust</label><input type="number" value={qty} onChange={(e) => setQty(e.target.value)} placeholder="e.g. 10" /></div>
-      <div className="field"><label>Update Price</label><input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder={item.price} /></div>
+      <div className="field"><label>{t('modal.qtyToAdjust')}</label><input type="number" value={qty} onChange={(e) => setQty(e.target.value)} placeholder={t('modal.qtyToAdjustPh')} /></div>
+      <div className="field"><label>{t('modal.updatePrice')}</label><input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder={item.price} /></div>
       {err && <div className="errmsg">{err}</div>}
-      <div className="field"><button className="btn" onClick={save} disabled={saving}>{saving ? 'Updating…' : 'Update Stock'}</button></div>
-      <div className="field"><button className="btn debit-btn" onClick={del} disabled={saving}>Delete Item</button></div>
-      <div className="field"><button className="btn ghost" onClick={onClose}>Cancel</button></div>
+      <div className="field"><button className="btn" onClick={save} disabled={saving}>{saving ? t('modal.updating') : t('modal.updateStock')}</button></div>
+      <div className="field"><button className="btn debit-btn" onClick={del} disabled={saving}>{t('modal.deleteItem')}</button></div>
+      <div className="field"><button className="btn ghost" onClick={onClose}>{t('common.cancel')}</button></div>
     </Modal>
   );
 }

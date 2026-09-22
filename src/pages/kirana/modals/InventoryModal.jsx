@@ -2,8 +2,10 @@ import { useState } from 'react';
 import Modal from '../../../components/Modal';
 import { kiranaApi } from '../../../api/kirana';
 import { apiErrorMessage } from '../../../api/client';
+import { useLanguage } from '../../../context/LanguageContext';
 
 export default function InventoryModal({ onClose, onSaved }) {
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [unit, setUnit] = useState('');
   const [qty, setQty] = useState('');
@@ -12,7 +14,7 @@ export default function InventoryModal({ onClose, onSaved }) {
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
-    if (!name.trim()) { setErr('Item name is required'); return; }
+    if (!name.trim()) { setErr(t('modal.itemNameRequired')); return; }
     setSaving(true);
     setErr('');
     try {
@@ -25,21 +27,21 @@ export default function InventoryModal({ onClose, onSaved }) {
       onSaved?.();
       onClose();
     } catch (e) {
-      setErr(apiErrorMessage(e, 'Could not save item'));
+      setErr(apiErrorMessage(e, t('modal.couldNotSaveItem')));
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <Modal title="Add Inventory Item" onClose={onClose}>
-      <div className="field"><label>Item Name</label><input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Sugar" /></div>
-      <div className="field"><label>Unit</label><input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="e.g. kg, pcs, ltr" /></div>
-      <div className="field"><label>Opening Qty</label><input type="number" value={qty} onChange={(e) => setQty(e.target.value)} placeholder="e.g. 50" /></div>
-      <div className="field"><label>Price Per Unit</label><input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 45" /></div>
+    <Modal title={t('modal.addInventoryTitle')} onClose={onClose}>
+      <div className="field"><label>{t('modal.itemName')}</label><input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('modal.itemNamePh')} /></div>
+      <div className="field"><label>{t('modal.unit')}</label><input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder={t('modal.unitPh')} /></div>
+      <div className="field"><label>{t('modal.openingQty')}</label><input type="number" value={qty} onChange={(e) => setQty(e.target.value)} placeholder={t('modal.openingQtyPh')} /></div>
+      <div className="field"><label>{t('modal.pricePerUnit')}</label><input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder={t('modal.pricePerUnitPh')} /></div>
       {err && <div className="errmsg">{err}</div>}
-      <div className="field"><button className="btn" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save Item'}</button></div>
-      <div className="field"><button className="btn ghost" onClick={onClose}>Cancel</button></div>
+      <div className="field"><button className="btn" onClick={save} disabled={saving}>{saving ? t('common.saving') : t('modal.saveItem')}</button></div>
+      <div className="field"><button className="btn ghost" onClick={onClose}>{t('common.cancel')}</button></div>
     </Modal>
   );
 }

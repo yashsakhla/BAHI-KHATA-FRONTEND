@@ -1,10 +1,14 @@
 import { useNavigate } from 'react-router-dom';
+import LanguageToggle from './LanguageToggle';
 
 export default function TopBar({ title, sub, onBack, rightSlot }) {
   const navigate = useNavigate();
   return (
     <div className="topbar">
-      {rightSlot && <div className="topbar-actions">{rightSlot}</div>}
+      <div className="topbar-actions">
+        {rightSlot}
+        <LanguageToggle />
+      </div>
       <div className="back-row">
         {onBack && (
           <div className="iconbtn" onClick={() => (typeof onBack === 'function' ? onBack() : navigate(-1))}>

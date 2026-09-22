@@ -6,9 +6,11 @@ import Empty from '../../components/Empty';
 import Modal from '../../components/Modal';
 import { coldApi } from '../../api/coldStorage';
 import { apiErrorMessage } from '../../api/client';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function StoreSelect() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +32,7 @@ export default function StoreSelect() {
   useEffect(() => { load(); }, [load]);
 
   const save = async () => {
-    if (!name.trim()) { setErr('Cold storage name is required'); return; }
+    if (!name.trim()) { setErr(t('coldSelect.nameRequired')); return; }
     setSaving(true);
     setErr('');
     try {
@@ -39,7 +41,7 @@ export default function StoreSelect() {
       setName('');
       load();
     } catch (e) {
-      setErr(apiErrorMessage(e, 'Could not save'));
+      setErr(apiErrorMessage(e, t('coldSelect.couldNotSave')));
     } finally {
       setSaving(false);
     }
@@ -47,18 +49,18 @@ export default function StoreSelect() {
 
   return (
     <div>
-      <TopBar title="Select Cold Storage" sub="Choose a unit to open" onBack={() => navigate('/firms')} />
+      <TopBar title={t('coldSelect.title')} sub={t('coldSelect.sub')} onBack={() => navigate('/firms')} />
       <div className="search-wrap">
         <div className="search-box">
           <span><Search size={16} /></span>
-          <input placeholder="Search cold storage..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input placeholder={t('coldSelect.searchPh')} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
       <div className="body-scroll" style={{ paddingTop: 14 }}>
         {loading ? (
-          <div className="spinner-wrap">Loading…</div>
+          <div className="spinner-wrap">{t('common.loading')}</div>
         ) : stores.length === 0 ? (
-          <Empty icon={Factory} msg="No cold storage added" hint="Tap + to add one" />
+          <Empty icon={Factory} msg={t('coldSelect.empty')} hint={t('coldSelect.emptyHint')} />
         ) : stores.map((s) => (
           <div className="firm-card" key={s._id} onClick={() => navigate(`/cold-storage/${s._id}`)}>
             <div className="firm-icon"><Snowflake size={22} /></div>
@@ -73,11 +75,11 @@ export default function StoreSelect() {
       <button className="fab" onClick={() => setShowAdd(true)}>+</button>
 
       {showAdd && (
-        <Modal title="Add Cold Storage" onClose={() => setShowAdd(false)}>
-          <div className="field"><label>Cold Storage Name</label><input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Manoj Cold Storage Unit 1" /></div>
+        <Modal title={t('coldSelect.addTitle')} onClose={() => setShowAdd(false)}>
+          <div className="field"><label>{t('coldSelect.nameLabel')}</label><input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('coldSelect.namePh')} /></div>
           {err && <div className="errmsg">{err}</div>}
-          <div className="field"><button className="btn" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button></div>
-          <div className="field"><button className="btn ghost" onClick={() => setShowAdd(false)}>Cancel</button></div>
+          <div className="field"><button className="btn" onClick={save} disabled={saving}>{saving ? t('common.saving') : t('common.save')}</button></div>
+          <div className="field"><button className="btn ghost" onClick={() => setShowAdd(false)}>{t('common.cancel')}</button></div>
         </Modal>
       )}
     </div>

@@ -3,8 +3,10 @@ import Modal from '../../../components/Modal';
 import { kiranaApi } from '../../../api/kirana';
 import { apiErrorMessage } from '../../../api/client';
 import { todayStr } from '../../../utils/format';
+import { useLanguage } from '../../../context/LanguageContext';
 
 export default function EntryModal({ presetCustomerName, presetType, customers = [], onClose, onSaved }) {
+  const { t } = useLanguage();
   const [type, setType] = useState(presetType || 'debit');
   const [customerName, setCustomerName] = useState(presetCustomerName || '');
   const [village, setVillage] = useState('');
@@ -30,7 +32,7 @@ export default function EntryModal({ presetCustomerName, presetType, customers =
 
   const save = async () => {
     if (!customerName.trim() || !itemName.trim() || !qty || Number(amount) < 0) {
-      setErr('Please fill customer, item and quantity');
+      setErr(t('modal.fillRequired'));
       return;
     }
     setSaving(true);
@@ -49,46 +51,46 @@ export default function EntryModal({ presetCustomerName, presetType, customers =
       onSaved?.();
       onClose();
     } catch (e) {
-      setErr(apiErrorMessage(e, 'Could not save entry'));
+      setErr(apiErrorMessage(e, t('modal.couldNotSaveEntry')));
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <Modal title={type === 'debit' ? 'Add Udhaar (Debit)' : 'Add Payment (Credit)'} onClose={onClose}>
+    <Modal title={type === 'debit' ? t('modal.entryDebitTitle') : t('modal.entryCreditTitle')} onClose={onClose}>
       <div className="field">
-        <label>Entry Type</label>
+        <label>{t('modal.entryType')}</label>
         <div className="toggle2">
-          <div className={`opt${type === 'debit' ? ' sel-debit' : ''}`} onClick={() => setType('debit')}>Udhaar (Debit)</div>
-          <div className={`opt${type === 'credit' ? ' sel-credit' : ''}`} onClick={() => setType('credit')}>Paid (Credit)</div>
+          <div className={`opt${type === 'debit' ? ' sel-debit' : ''}`} onClick={() => setType('debit')}>{t('modal.udhaarDebit')}</div>
+          <div className={`opt${type === 'credit' ? ' sel-credit' : ''}`} onClick={() => setType('credit')}>{t('modal.paidCredit')}</div>
         </div>
       </div>
       <div className="field">
-        <label>Customer Name</label>
+        <label>{t('modal.customerName')}</label>
         <input
           list="entry-cust-list"
           value={customerName}
           onChange={(e) => onCustomerInput(e.target.value)}
-          placeholder="e.g. Ramesh Yadav"
+          placeholder={t('modal.customerNamePh')}
           disabled={!!presetCustomerName}
         />
         <datalist id="entry-cust-list">
           {customers.map((c) => <option key={c._id} value={c.name} />)}
         </datalist>
       </div>
-      <div className="field"><label>Village / Place</label><input value={village} onChange={(e) => setVillage(e.target.value)} placeholder="e.g. Bargawan" /></div>
-      <div className="field"><label>Date</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-      <div className="field"><label>Item / Description</label><input value={itemName} onChange={(e) => setItemName(e.target.value)} placeholder="e.g. Rice, Sugar, Oil" /></div>
-      <div className="field"><label>Quantity</label><input type="number" value={qty} onChange={(e) => setQty(e.target.value)} placeholder="e.g. 5" /></div>
-      <div className="field"><label>Amount (₹)</label><input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 450" /></div>
+      <div className="field"><label>{t('modal.village')}</label><input value={village} onChange={(e) => setVillage(e.target.value)} placeholder={t('modal.villagePh')} /></div>
+      <div className="field"><label>{t('common.date')}</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+      <div className="field"><label>{t('modal.itemDesc')}</label><input value={itemName} onChange={(e) => setItemName(e.target.value)} placeholder={t('modal.itemDescPh')} /></div>
+      <div className="field"><label>{t('modal.quantity')}</label><input type="number" value={qty} onChange={(e) => setQty(e.target.value)} placeholder={t('modal.quantityPh')} /></div>
+      <div className="field"><label>{t('modal.amountRs')}</label><input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={t('modal.amountPh')} /></div>
       <div className="check-row">
         <input type="checkbox" id="entry-gendoc" checked={generateDoc} onChange={(e) => setGenerateDoc(e.target.checked)} />
-        <label htmlFor="entry-gendoc">Also generate {type === 'debit' ? 'an invoice' : 'a receipt'} for this entry</label>
+        <label htmlFor="entry-gendoc">{type === 'debit' ? t('modal.alsoGenInvoice') : t('modal.alsoGenReceipt')}</label>
       </div>
       {err && <div className="errmsg">{err}</div>}
-      <div className="field"><button className={`btn ${type === 'debit' ? 'debit-btn' : 'credit-btn'}`} onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save Entry'}</button></div>
-      <div className="field"><button className="btn ghost" onClick={onClose}>Cancel</button></div>
+      <div className="field"><button className={`btn ${type === 'debit' ? 'debit-btn' : 'credit-btn'}`} onClick={save} disabled={saving}>{saving ? t('common.saving') : t('modal.saveEntry')}</button></div>
+      <div className="field"><button className="btn ghost" onClick={onClose}>{t('common.cancel')}</button></div>
     </Modal>
   );
 }

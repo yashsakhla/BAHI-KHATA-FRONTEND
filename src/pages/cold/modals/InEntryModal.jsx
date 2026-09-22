@@ -3,8 +3,10 @@ import Modal from '../../../components/Modal';
 import { coldApi } from '../../../api/coldStorage';
 import { apiErrorMessage } from '../../../api/client';
 import { todayStr } from '../../../utils/format';
+import { useLanguage } from '../../../context/LanguageContext';
 
 export default function InEntryModal({ storeId, onClose, onSaved }) {
+  const { t } = useLanguage();
   const [date, setDate] = useState(todayStr());
   const [time, setTime] = useState('');
   const [lotNumber, setLotNumber] = useState('');
@@ -20,7 +22,7 @@ export default function InEntryModal({ storeId, onClose, onSaved }) {
 
   const save = async () => {
     if (!lotNumber.trim() || !ownerName.trim() || !materialName.trim()) {
-      setErr('Lot number, owner and material are required');
+      setErr(t('modal.lotOwnerMaterialRequired'));
       return;
     }
     setSaving(true);
@@ -34,27 +36,27 @@ export default function InEntryModal({ storeId, onClose, onSaved }) {
       onSaved?.();
       onClose();
     } catch (e) {
-      setErr(apiErrorMessage(e, 'Could not save entry'));
+      setErr(apiErrorMessage(e, t('modal.couldNotSaveEntry')));
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <Modal title="New IN Entry" onClose={onClose}>
-      <div className="field"><label>Date</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-      <div className="field"><label>Time</label><input type="time" value={time} onChange={(e) => setTime(e.target.value)} /></div>
-      <div className="field"><label>Lot Number</label><input value={lotNumber} onChange={(e) => setLotNumber(e.target.value)} placeholder="e.g. LOT-014" /></div>
-      <div className="field"><label>Product Owner Name</label><input value={ownerName} onChange={(e) => setOwnerName(e.target.value)} placeholder="e.g. Suresh Patel" /></div>
-      <div className="field"><label>Material Name</label><input value={materialName} onChange={(e) => setMaterialName(e.target.value)} placeholder="e.g. Potato" /></div>
-      <div className="field"><label>Sack Count</label><input type="number" value={sackCount} onChange={(e) => setSackCount(e.target.value)} placeholder="e.g. 120" /></div>
-      <div className="field"><label>Weight (kg)</label><input type="number" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} placeholder="e.g. 6000" /></div>
-      <div className="field"><label>Lender Entry</label><input value={lenderEntry} onChange={(e) => setLenderEntry(e.target.value)} placeholder="e.g. self / bank / party" /></div>
-      <div className="field"><label>Vehicle Number</label><input value={vehicleNumber} onChange={(e) => setVehicleNumber(e.target.value)} placeholder="e.g. MP20 AB 1234" /></div>
-      <div className="field"><label>Rate per kg</label><input type="number" value={ratePerKg} onChange={(e) => setRatePerKg(e.target.value)} placeholder="e.g. 8" /></div>
+    <Modal title={t('modal.newInTitle')} onClose={onClose}>
+      <div className="field"><label>{t('common.date')}</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+      <div className="field"><label>{t('modal.time')}</label><input type="time" value={time} onChange={(e) => setTime(e.target.value)} /></div>
+      <div className="field"><label>{t('modal.lotNumber')}</label><input value={lotNumber} onChange={(e) => setLotNumber(e.target.value)} placeholder={t('modal.lotNumberPh')} /></div>
+      <div className="field"><label>{t('modal.productOwnerName')}</label><input value={ownerName} onChange={(e) => setOwnerName(e.target.value)} placeholder={t('modal.ownerNamePh')} /></div>
+      <div className="field"><label>{t('modal.materialName')}</label><input value={materialName} onChange={(e) => setMaterialName(e.target.value)} placeholder={t('modal.materialNamePh')} /></div>
+      <div className="field"><label>{t('modal.sackCount')}</label><input type="number" value={sackCount} onChange={(e) => setSackCount(e.target.value)} placeholder={t('modal.sackCountPh')} /></div>
+      <div className="field"><label>{t('modal.weightKg')}</label><input type="number" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} placeholder={t('modal.weightKgPh')} /></div>
+      <div className="field"><label>{t('modal.lenderEntry')}</label><input value={lenderEntry} onChange={(e) => setLenderEntry(e.target.value)} placeholder={t('modal.lenderEntryPh')} /></div>
+      <div className="field"><label>{t('modal.vehicleNumber')}</label><input value={vehicleNumber} onChange={(e) => setVehicleNumber(e.target.value)} placeholder={t('modal.vehicleNumberPh')} /></div>
+      <div className="field"><label>{t('modal.ratePerKg')}</label><input type="number" value={ratePerKg} onChange={(e) => setRatePerKg(e.target.value)} placeholder={t('modal.ratePerKgPh')} /></div>
       {err && <div className="errmsg">{err}</div>}
-      <div className="field"><button className="btn credit-btn" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save IN Entry'}</button></div>
-      <div className="field"><button className="btn ghost" onClick={onClose}>Cancel</button></div>
+      <div className="field"><button className="btn credit-btn" onClick={save} disabled={saving}>{saving ? t('common.saving') : t('modal.saveInEntry')}</button></div>
+      <div className="field"><button className="btn ghost" onClick={onClose}>{t('common.cancel')}</button></div>
     </Modal>
   );
 }

@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ShoppingBag } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageToggle from '../components/LanguageToggle';
 
 export default function Login() {
   const { login, loading, error } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -17,16 +20,17 @@ export default function Login() {
 
   return (
     <div className="login-wrap">
+      <LanguageToggle light className="login-lang-toggle" />
       <div className="brand-seal"><ShoppingBag size={28} /></div>
-      <div className="login-title">Bahi Khata</div>
-      <div className="login-sub">Smart ledger &amp; cold storage register</div>
+      <div className="login-title">{t('login.title')}</div>
+      <div className="login-sub">{t('login.sub')}</div>
       <form onSubmit={submit}>
         <div className="field">
-          <label>Username</label>
-          <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" required />
+          <label>{t('login.username')}</label>
+          <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder={t('login.usernamePh')} required />
         </div>
         <div className="field">
-          <label>Password</label>
+          <label>{t('login.password')}</label>
           <input
             type="password"
             value={password}
@@ -38,12 +42,12 @@ export default function Login() {
         {error && <div className="errmsg">{error}</div>}
         <div className="field" style={{ marginTop: 6 }}>
           <button className="btn" disabled={loading} type="submit">
-            {loading ? 'Logging in…' : 'Login'}
+            {loading ? t('login.loggingIn') : t('login.button')}
           </button>
         </div>
       </form>
       <div className="login-switch">
-        New here? <Link to="/register">Create an account</Link>
+        {t('login.newHere')} <Link to="/register">{t('login.createAccount')}</Link>
       </div>
     </div>
   );

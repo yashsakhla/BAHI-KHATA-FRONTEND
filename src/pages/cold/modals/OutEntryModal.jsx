@@ -3,8 +3,10 @@ import Modal from '../../../components/Modal';
 import { coldApi } from '../../../api/coldStorage';
 import { apiErrorMessage } from '../../../api/client';
 import { todayStr } from '../../../utils/format';
+import { useLanguage } from '../../../context/LanguageContext';
 
 export default function OutEntryModal({ storeId, onClose, onSaved }) {
+  const { t } = useLanguage();
   const [date, setDate] = useState(todayStr());
   const [ownerName, setOwnerName] = useState('');
   const [lotNumber, setLotNumber] = useState('');
@@ -15,7 +17,7 @@ export default function OutEntryModal({ storeId, onClose, onSaved }) {
   useEffect(() => { coldApi.listLotNumbers(storeId).then(setLots).catch(() => {}); }, [storeId]);
 
   const save = async () => {
-    if (!ownerName.trim()) { setErr('Owner name is required'); return; }
+    if (!ownerName.trim()) { setErr(t('modal.ownerNameRequired')); return; }
     setSaving(true);
     setErr('');
     try {
@@ -23,24 +25,24 @@ export default function OutEntryModal({ storeId, onClose, onSaved }) {
       onSaved?.();
       onClose();
     } catch (e) {
-      setErr(apiErrorMessage(e, 'Could not save entry'));
+      setErr(apiErrorMessage(e, t('modal.couldNotSaveEntry')));
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <Modal title="New OUT Entry" onClose={onClose}>
-      <div className="field"><label>Date</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-      <div className="field"><label>Owner Taken Out</label><input value={ownerName} onChange={(e) => setOwnerName(e.target.value)} placeholder="e.g. Suresh Patel" /></div>
+    <Modal title={t('modal.newOutTitle')} onClose={onClose}>
+      <div className="field"><label>{t('common.date')}</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+      <div className="field"><label>{t('modal.ownerTakenOut')}</label><input value={ownerName} onChange={(e) => setOwnerName(e.target.value)} placeholder={t('modal.ownerNamePh')} /></div>
       <div className="field">
-        <label>Lot Number (optional)</label>
-        <input list="lot-list" value={lotNumber} onChange={(e) => setLotNumber(e.target.value)} placeholder="e.g. LOT-014" />
+        <label>{t('modal.lotNumberOptional')}</label>
+        <input list="lot-list" value={lotNumber} onChange={(e) => setLotNumber(e.target.value)} placeholder={t('modal.lotNumberPh')} />
         <datalist id="lot-list">{lots.map((l) => <option key={l} value={l} />)}</datalist>
       </div>
       {err && <div className="errmsg">{err}</div>}
-      <div className="field"><button className="btn debit-btn" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save OUT Entry'}</button></div>
-      <div className="field"><button className="btn ghost" onClick={onClose}>Cancel</button></div>
+      <div className="field"><button className="btn debit-btn" onClick={save} disabled={saving}>{saving ? t('common.saving') : t('modal.saveOutEntry')}</button></div>
+      <div className="field"><button className="btn ghost" onClick={onClose}>{t('common.cancel')}</button></div>
     </Modal>
   );
 }

@@ -5,6 +5,7 @@ import TopBar from '../../components/TopBar';
 import Empty from '../../components/Empty';
 import { kiranaApi } from '../../api/kirana';
 import { fmt } from '../../utils/format';
+import { useLanguage } from '../../context/LanguageContext';
 import EntryModal from './modals/EntryModal';
 import InventoryModal from './modals/InventoryModal';
 import StockAdjustModal from './modals/StockAdjustModal';
@@ -12,15 +13,9 @@ import NewBillModal from './modals/NewBillModal';
 import BillDetailModal from './modals/BillDetailModal';
 import ReceiptDetailModal from './modals/ReceiptDetailModal';
 
-const TABS = [
-  ['customers', 'Customers', Users],
-  ['inventory', 'Inventory', Package],
-  ['bills', 'Bills', Receipt],
-  ['history', 'History', FolderClock],
-];
-
 export default function KiranaHome() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [tab, setTab] = useState('customers');
   const [search, setSearch] = useState('');
 
@@ -36,6 +31,13 @@ export default function KiranaHome() {
   const [showNewBill, setShowNewBill] = useState(false);
   const [viewBill, setViewBill] = useState(null);
   const [viewReceipt, setViewReceipt] = useState(null);
+
+  const TABS = [
+    ['customers', t('kirana.tab.customers'), Users],
+    ['inventory', t('kirana.tab.inventory'), Package],
+    ['bills', t('kirana.tab.bills'), Receipt],
+    ['history', t('kirana.tab.history'), FolderClock],
+  ];
 
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -94,11 +96,11 @@ export default function KiranaHome() {
 
   return (
     <div>
-      <TopBar title="Manoj Kirana Dukan" sub="Grocery Ledger" onBack={() => navigate('/firms')} />
+      <TopBar title={t('kirana.title')} sub={t('kirana.sub')} onBack={() => navigate('/firms')} />
       <div className="search-wrap">
         <div className="search-box">
           <span><Search size={16} /></span>
-          <input placeholder="Search anything..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input placeholder={t('kirana.searchPh')} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
       <div className="tabs">
@@ -108,11 +110,11 @@ export default function KiranaHome() {
       </div>
 
       <div className="body-scroll">
-        {loading && <div className="spinner-wrap">Loading…</div>}
+        {loading && <div className="spinner-wrap">{t('common.loading')}</div>}
 
         {!loading && tab === 'customers' && (
           filteredCustomers.length === 0 ? (
-            <Empty icon={BookOpen} msg="No customers yet" hint="Tap + to add a debit or credit entry" />
+            <Empty icon={BookOpen} msg={t('kirana.emptyCustomers')} hint={t('kirana.emptyCustomersHint')} />
           ) : filteredCustomers.map((c) => (
             <div className="card" key={c._id}>
               <div className="card-row" onClick={() => navigate(`/kirana/customers/${c._id}`)}>
@@ -131,7 +133,7 @@ export default function KiranaHome() {
 
         {!loading && tab === 'inventory' && (
           inventory.length === 0 ? (
-            <Empty icon={Package} msg="No inventory items yet" hint="Tap + to add stock" />
+            <Empty icon={Package} msg={t('kirana.emptyInventory')} hint={t('kirana.emptyInventoryHint')} />
           ) : inventory
             .filter((i) => !q || i.name.toLowerCase().includes(q))
             .map((item) => (
@@ -140,7 +142,7 @@ export default function KiranaHome() {
                   <div className="avatar"><Package size={18} /></div>
                   <div style={{ flex: 1 }}>
                     <div className="title-line">{item.name}</div>
-                    <div className="sub-line">{item.qty} {item.unit} in stock</div>
+                    <div className="sub-line">{item.qty} {item.unit} {t('kirana.inStock')}</div>
                   </div>
                   <div className="amt">₹{fmt(item.price)}</div>
                 </div>
@@ -150,14 +152,14 @@ export default function KiranaHome() {
 
         {!loading && tab === 'bills' && (
           filteredBills.length === 0 ? (
-            <Empty icon={Receipt} msg="No bills yet" hint="Tap + to create a new bill" />
+            <Empty icon={Receipt} msg={t('kirana.emptyBills')} hint={t('kirana.emptyBillsHint')} />
           ) : filteredBills.map((b) => (
             <div className="card" key={b._id}>
               <div className="card-row" onClick={() => setViewBill(b)}>
                 <div className="avatar"><Receipt size={18} /></div>
                 <div style={{ flex: 1 }}>
                   <div className="title-line">{b.billNo} · {b.customerName}</div>
-                  <div className="sub-line">{b.date} · {b.items.length} items</div>
+                  <div className="sub-line">{b.date} · {b.items.length} {t('kirana.items')}</div>
                 </div>
                 <div className="amt debit">₹{fmt(b.total)}</div>
               </div>
@@ -167,7 +169,7 @@ export default function KiranaHome() {
 
         {!loading && tab === 'history' && (
           filteredEntries.length === 0 ? (
-            <Empty icon={FolderClock} msg="No ledger history yet" hint="Entries you add will show up here" />
+            <Empty icon={FolderClock} msg={t('kirana.emptyHistory')} hint={t('kirana.emptyHistoryHint')} />
           ) : filteredEntries.map((e) => {
             const c = customers.find((x) => x._id === e.customerId);
             return (
@@ -180,11 +182,11 @@ export default function KiranaHome() {
                   <div className="tile-detail"><span>{e.itemName} × {e.qty}</span><span>{e.date}</span></div>
                   <div className="tile-detail">
                     <span>{e.village ? <><MapPin size={12} style={{ verticalAlign: '-2px', marginRight: 3 }} />{e.village}</> : ''}</span>
-                    <span className={`badge ${e.type}`}>{e.type === 'debit' ? 'Udhaar' : 'Paid'}</span>
+                    <span className={`badge ${e.type}`}>{e.type === 'debit' ? t('kirana.udhaar') : t('kirana.paid')}</span>
                   </div>
                   <div style={{ textAlign: 'right', marginTop: 8 }}>
                     <button className="doc-gen-btn" onClick={() => handleGenerateDoc(e)}>
-                      {e.docId ? 'View Doc' : e.type === 'debit' ? 'Generate Invoice' : 'Generate Receipt'}
+                      {e.docId ? t('kirana.viewDoc') : e.type === 'debit' ? t('kirana.generateInvoice') : t('kirana.generateReceipt')}
                     </button>
                   </div>
                 </div>

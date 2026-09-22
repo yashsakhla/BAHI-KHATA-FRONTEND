@@ -5,20 +5,15 @@ import TopBar from '../../components/TopBar';
 import Empty from '../../components/Empty';
 import { coldApi } from '../../api/coldStorage';
 import { fmt } from '../../utils/format';
+import { useLanguage } from '../../context/LanguageContext';
 import InEntryModal from './modals/InEntryModal';
 import OutEntryModal from './modals/OutEntryModal';
 import RentEntryModal from './modals/RentEntryModal';
 
-const TABS = [
-  ['in', 'IN', ArrowDownToLine],
-  ['out', 'OUT', ArrowUpFromLine],
-  ['rent', 'Rent', Wallet],
-  ['history', 'History', FolderClock],
-];
-
 export default function StoreHome() {
   const { storeId } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [store, setStore] = useState(null);
   const [tab, setTab] = useState('in');
   const [search, setSearch] = useState('');
@@ -26,6 +21,13 @@ export default function StoreHome() {
   const [rentData, setRentData] = useState({ rents: [], totalRent: 0 });
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null); // 'in' | 'out' | 'rent' | null
+
+  const TABS = [
+    ['in', t('coldHome.tab.in'), ArrowDownToLine],
+    ['out', t('coldHome.tab.out'), ArrowUpFromLine],
+    ['rent', t('coldHome.tab.rent'), Wallet],
+    ['history', t('coldHome.tab.history'), FolderClock],
+  ];
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -50,8 +52,8 @@ export default function StoreHome() {
   if (!store && loading) {
     return (
       <div>
-        <TopBar title="Loading…" onBack={() => navigate('/cold-storage')} />
-        <div className="spinner-wrap">Loading…</div>
+        <TopBar title={t('common.loading')} onBack={() => navigate('/cold-storage')} />
+        <div className="spinner-wrap">{t('common.loading')}</div>
       </div>
     );
   }
@@ -59,11 +61,11 @@ export default function StoreHome() {
 
   return (
     <div>
-      <TopBar title={store.name} sub="Cold Storage Register" onBack={() => navigate('/cold-storage')} />
+      <TopBar title={store.name} sub={t('coldHome.sub')} onBack={() => navigate('/cold-storage')} />
       <div className="search-wrap">
         <div className="search-box">
           <span><Search size={16} /></span>
-          <input placeholder="Search records..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input placeholder={t('coldHome.searchPh')} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
       <div className="tabs">
@@ -73,19 +75,19 @@ export default function StoreHome() {
       </div>
 
       <div className="body-scroll">
-        {loading && <div className="spinner-wrap">Loading…</div>}
+        {loading && <div className="spinner-wrap">{t('common.loading')}</div>}
 
         {!loading && tab === 'rent' && (
           <>
             <div className="balance-strip" style={{ marginBottom: 6 }}>
-              <div className="bpill" style={{ flex: 1 }}><div className="lbl">Total Rent Paid</div><div className="val amt amber">₹{fmt(rentData.totalRent)}</div></div>
+              <div className="bpill" style={{ flex: 1 }}><div className="lbl">{t('coldHome.totalRentPaid')}</div><div className="val amt amber">₹{fmt(rentData.totalRent)}</div></div>
             </div>
             {rentData.rents.length === 0 ? (
-              <Empty icon={Wallet} msg="No rent payments" hint="Tap + to add one" />
+              <Empty icon={Wallet} msg={t('coldHome.emptyRent')} hint={t('coldHome.emptyRentHint')} />
             ) : rentData.rents.map((r) => (
               <div className="card" key={r._id}>
                 <div className="tile">
-                  <div className="tile-row"><div className="title-line" style={{ fontSize: 13.5 }}>Rent Payment</div><span className="tag-mode rent">Rent</span></div>
+                  <div className="tile-row"><div className="title-line" style={{ fontSize: 13.5 }}>{t('coldHome.rentPayment')}</div><span className="tag-mode rent">{t('coldHome.rent')}</span></div>
                   <div className="tile-detail"><span>{r.date}</span><span className="amt amber">₹{fmt(r.amount)}</span></div>
                 </div>
               </div>
@@ -95,7 +97,7 @@ export default function StoreHome() {
 
         {!loading && tab !== 'rent' && (
           entries.length === 0 ? (
-            <Empty icon={Package} msg="No records" hint="Tap + to add an entry" />
+            <Empty icon={Package} msg={t('coldHome.emptyRecords')} hint={t('coldHome.emptyRecordsHint')} />
           ) : entries.map((e) => e.mode === 'in' ? (
             <div className="card" key={e._id}>
               <div className="tile">
@@ -104,9 +106,9 @@ export default function StoreHome() {
                   <span className="tag-mode in">IN</span>
                 </div>
                 <div className="tile-detail"><span>{e.materialName}</span><span>{e.date} {e.time || ''}</span></div>
-                <div className="tile-detail"><span>Owner: {e.ownerName}</span><span>Lender: {e.lenderEntry || '—'}</span></div>
-                <div className="tile-detail"><span>{e.sackCount} · {e.weightKg} kg</span><span>Vehicle: {e.vehicleNumber || '—'}</span></div>
-                <div className="tile-detail"><span>Rate: ₹{fmt(e.ratePerKg)}/kg</span><span className="amt debit">≈ ₹{fmt((e.ratePerKg || 0) * (e.weightKg || 0))}</span></div>
+                <div className="tile-detail"><span>{t('coldHome.owner')}: {e.ownerName}</span><span>{t('coldHome.lender')}: {e.lenderEntry || '—'}</span></div>
+                <div className="tile-detail"><span>{e.sackCount} · {e.weightKg} kg</span><span>{t('coldHome.vehicle')}: {e.vehicleNumber || '—'}</span></div>
+                <div className="tile-detail"><span>{t('coldHome.rate')}: ₹{fmt(e.ratePerKg)}/kg</span><span className="amt debit">≈ ₹{fmt((e.ratePerKg || 0) * (e.weightKg || 0))}</span></div>
               </div>
             </div>
           ) : (
@@ -116,7 +118,7 @@ export default function StoreHome() {
                   <div className="title-line" style={{ fontSize: 13.5 }}>{e.lotNumber ? `Lot #${e.lotNumber}` : ''}</div>
                   <span className="tag-mode out">OUT</span>
                 </div>
-                <div className="tile-detail"><span>Taken by: {e.outOwnerName}</span><span>{e.date}</span></div>
+                <div className="tile-detail"><span>{t('coldHome.takenBy')}: {e.outOwnerName}</span><span>{e.date}</span></div>
               </div>
             </div>
           ))
