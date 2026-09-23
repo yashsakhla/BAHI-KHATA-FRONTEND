@@ -9,6 +9,8 @@ import KiranaHome from './pages/kirana/KiranaHome';
 import CustomerDetail from './pages/kirana/CustomerDetail';
 import StoreSelect from './pages/cold/StoreSelect';
 import StoreHome from './pages/cold/StoreHome';
+import MillSelect from './pages/rice-mill/MillSelect';
+import MillHome from './pages/rice-mill/MillHome';
 
 export default function App() {
   return (
@@ -25,6 +27,8 @@ export default function App() {
               <Route path="/kirana/customers/:id" element={<CustomerDetail />} />
               <Route path="/cold-storage" element={<StoreSelect />} />
               <Route path="/cold-storage/:storeId" element={<StoreHome />} />
+              <Route path="/rice-mill" element={<MillSelect />} />
+              <Route path="/rice-mill/:millId" element={<MillHome />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/firms" replace />} />

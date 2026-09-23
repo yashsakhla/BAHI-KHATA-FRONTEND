@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Snowflake, ArrowRight } from 'lucide-react';
+import { ShoppingCart, Wheat, Snowflake, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageToggle from '../components/LanguageToggle';
@@ -27,6 +27,14 @@ export default function Firms() {
           <div>
             <div className="firm-name">{t('firms.kiranaName')}</div>
             <div className="firm-tag">{t('firms.kiranaTag')}</div>
+          </div>
+          <div className="firm-arrow"><ArrowRight size={18} /></div>
+        </div>
+        <div className="firm-card" onClick={() => navigate('/rice-mill')}>
+          <div className="firm-icon"><Wheat size={22} /></div>
+          <div>
+            <div className="firm-name">{t('firms.riceMillName')}</div>
+            <div className="firm-tag">{t('firms.riceMillTag')}</div>
           </div>
           <div className="firm-arrow"><ArrowRight size={18} /></div>
         </div>
